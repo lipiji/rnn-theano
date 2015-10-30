@@ -137,12 +137,6 @@ class Cell(object):
             updates = updates_w
         )
 
-def rmse(py, y):
-    e = 0
-    for t in xrange(len(y)):
-        e += np.sqrt(np.mean((np.asarray(py[t,]) - np.asarray(y[t,])) ** 2))
-    return e / t
-
 def get_pre_h(t, size, H):
     if t == 0:
         return np.zeros((1, size), dtype=theano.config.floatX)
@@ -166,7 +160,7 @@ def train():
 
             seq = seqs[s];
             X = seq[0 : (len(seq) - 1),]
-            Y = np.asmatrix(seq[1 : len(seq),])
+            Y = seq[1 : len(seq),]
             pre_h = np.zeros((1, h_size), dtype=theano.config.floatX);
             [R, Z, GH, H] = cell.active(X, pre_h)
 
@@ -178,20 +172,20 @@ def train():
             PY = cell.predict(H)
             PY = np.asmatrix(PY)
             print i2w[np.argmax(X[0,])],
-            for t in xrange(len(PY)):
+            for t in xrange(PY.shape[0]):
                 print i2w[np.argmax(PY[t,])],
             
             print "Iter = ", i, ", RMSE = ", rmse(PY, Y)
 
-            DY = np.zeros((len(X), len(X[0,])), dtype=theano.config.floatX)
-            DH = np.zeros((len(X), h_size), dtype=theano.config.floatX)
+            DY = np.zeros(Y.shape, dtype=theano.config.floatX)
+            DH = np.zeros((Y.shape[0], h_size), dtype=theano.config.floatX)
             DGH = np.copy(DH)
             DR = np.copy(DH)
             DZ = np.copy(DH)
-            for t in xrange(len(X) - 1, -1, -1):
+            for t in xrange(X.shape[0] - 1, -1, -1):
                 pre_h = get_pre_h(t, h_size, H)
                 
-                if t == (len(X) - 1):
+                if t == (X.shape[0] - 1):
                     post_dh = np.zeros((1, h_size), dtype=theano.config.floatX)
                     post_dgh = np.copy(post_dh)
                     post_dr = np.copy(post_dh)
@@ -223,7 +217,7 @@ def train():
             cell.clear_grad()
             for t in xrange(len(X)):
                 pre_h = get_pre_h(t, h_size, H)
-                cell.grad(np.asmatrix(X[t,]), R[t,], pre_h, H[t,], DY[t,], DZ[t,], DR[t,], DGH[t,])
+                cell.grad(X[t,], R[t,], pre_h, H[t,], DY[t,], DZ[t,], DR[t,], DGH[t,])
            
             tm1 = t - 1
             if tm1 < 1:
@@ -232,4 +226,5 @@ def train():
     print time.time() - start
    
 if __name__ == '__main__':
+
     train()
