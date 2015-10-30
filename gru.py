@@ -218,7 +218,8 @@ def train():
             for t in xrange(len(X)):
                 pre_h = get_pre_h(t, h_size, H)
                 cell.grad(X[t,], R[t,], pre_h, H[t,], DY[t,], DZ[t,], DR[t,], DGH[t,])
-           
+          
+            t = len(X)
             tm1 = t - 1
             if tm1 < 1:
                 tm1 = 1
