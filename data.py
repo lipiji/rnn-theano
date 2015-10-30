@@ -36,6 +36,7 @@ def char_sequence():
     return seqs, i2w, w2i
 
 
+#data: http://deeplearning.net/data/mnist/mnist.pkl.gz
 def mnist(batch_size = 1):
     def batch(X, Y, batch_size):
         data_xy = {}
@@ -58,9 +59,10 @@ def mnist(batch_size = 1):
     train_set, valid_set, test_set = cPickle.load(f)
     f.close()
     return batch(train_set[0], train_set[1], batch_size), \
-           batch(valid_set[0], valid_set[1], 1), \
-           batch(test_set[0], test_set[1], 1)
+           batch(valid_set[0], valid_set[1], batch_size), \
+           batch(test_set[0], test_set[1], batch_size)
 
+#data: http://deeplearning.net/data/mnist/mnist.pkl.gz
 def shared_mnist():
     def shared_dataset(data_xy):
         data_x, data_y = data_xy
