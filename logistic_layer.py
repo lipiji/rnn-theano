@@ -15,8 +15,6 @@ class Logistic(object):
         self.gW = init_gradws(shape)
         self.gb = init_bias(self.out_size)
 
-
-
         D, X = T.matrices("D", "X")
         def _active(X):
             return T.nnet.sigmoid(T.dot(X, self.W) + self.b)

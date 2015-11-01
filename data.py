@@ -8,15 +8,17 @@ import cPickle, gzip
 
 curr_path = os.path.dirname(os.path.abspath(os.path.expanduser(__file__)))
 
-def char_sequence():
+def char_sequence(f_path = None):
     seqs = []
     i2w = {}
     w2i = {}
     lines = []
-    #f = open(curr_path + "/shakespeare.txt", "r")
-    f = open(curr_path + "/data/toy.txt", "r")
+    if f_path == None:
+        f = open(curr_path + "/data/toy.txt", "r")
+    else:
+        f = open(curr_path + "/" + f_path, "r")
     for line in f:
-        line = line.strip('\n')
+        line = line.strip('\n').lower()
         if len(line) < 3:
             continue
         lines.append(line)

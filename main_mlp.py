@@ -17,10 +17,6 @@ train_set, valid_set, test_set  = data.mnist(batch_size)
 hidden_size = [200]
 layers = []
 
-#layers = [GRULayer(len(w2i), hidden_size[0]),
-#          GRULayer(hidden_size[0], hidden_size[1]),
-#          SoftmaxLayer(hidden_size[len(hidden_size) - 1], len(w2i))]
-
 dim_x = train_set[0][0][0].shape[1]
 dim_y = train_set[0][1][0].shape[1]
 print dim_x, dim_y
@@ -37,7 +33,7 @@ nn = NN(layers)
 
 #batch train
 start = time.time()
-for i in xrange(5):
+for i in xrange(100):
     acc = 0.0
     in_start = time.time()
     for index, data_xy in train_set.items():

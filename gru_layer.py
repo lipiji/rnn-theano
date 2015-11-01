@@ -57,7 +57,7 @@ class GRU(object):
                 + post_dh * z
             dgh = dh * (1 - z) * (1 - gh ** 2)
             dr = T.dot(dgh * pre_h, self.W_hh.T) * ((1 - r) * r)
-            dz = (1 - dh * (gh - pre_h)) * ((1 - z) * z)
+            dz = (dh * (pre_h - gh)) * ((1 - z) * z)
             return dh, dgh, dr, dz
         prop, r, z, gh, pre_h, post_dh, post_dgh, post_dr, post_dz, post_r = \
                 T.matrices("prop", "r", "z", "gh", "pre_h", "post_dh", "post_dgh", "post_dr", "post_dz", "post_r")
@@ -109,6 +109,7 @@ class GRU(object):
                (self.b_r, self.b_r - self.gb_r * lr / t),
                (self.b_z, self.b_z - self.gb_z * lr / t),
                (self.b_h, self.b_h - self.gb_h * lr / t)]
+
         self.update = theano.function(
             inputs = [lr, t, tm1],
             updates = updates_w

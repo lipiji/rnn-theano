@@ -74,7 +74,7 @@ class Cell(object):
                 + post_dh * z
             dgh = dh * (1 - z) * (1 - gh ** 2)
             dr = T.dot(dgh * pre_h, self.W_hh.T) * ((1 - r) * r)
-            dz = (1 - dh * (gh - pre_h)) * ((1 - z) * z)
+            dz = (dh * (pre_h - gh)) * ((1 - z) * z)
             return dy, dh, dgh, dr, dz
         y, py, r, z, gh, pre_h, post_dh, post_dgh, post_dr, post_dz, post_r = \
                 T.matrices("y", "py", "r", "z", "gh", "pre_h", "post_dh", "post_dgh", "post_dr", "post_dz", "post_r")
@@ -146,7 +146,7 @@ def get_pre_h(t, size, H):
 def train():
     seqs, i2w, w2i = char_sequence()
 
-    learning_rate = 0.2;
+    learning_rate = 0.5;
     h_size = 100;
     
     cell = Cell((len(w2i), h_size))
@@ -168,6 +168,8 @@ def train():
             Z = np.asmatrix(Z)
             GH = np.asmatrix(GH)
             H = np.asmatrix(H)
+    
+            print H.shape
 
             PY = cell.predict(H)
             PY = np.asmatrix(PY)
@@ -175,7 +177,7 @@ def train():
             for t in xrange(PY.shape[0]):
                 print i2w[np.argmax(PY[t,])],
             
-            print "Iter = ", i, ", RMSE = ", rmse(PY, Y)
+            print "\nIter = ", i, ", RMSE = ", rmse(PY, Y)
 
             DY = np.zeros(Y.shape, dtype=theano.config.floatX)
             DH = np.zeros((Y.shape[0], h_size), dtype=theano.config.floatX)
