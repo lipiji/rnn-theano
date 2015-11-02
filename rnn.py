@@ -1,18 +1,19 @@
 #pylint: skip-file
-import time
 import numpy as np
 import theano
 import theano.tensor as T
-from softmax_layer import *
-from gru_layer import *
+
+from softmax import *
+from gru import *
+from lstm import *
 from updates import *
 
 class RNN(object):
-    def __init__(self, in_size, out_size, hidden_size):
+    def __init__(self, in_size, out_size, hidden_size, cell = "gru"):
         X = T.matrix("X")
-        self.create_model(X, in_size, out_size, hidden_size)
+        self.create_model(X, in_size, out_size, hidden_size, cell)
 
-    def create_model(self, X, in_size, out_size, hidden_size):
+    def create_model(self, X, in_size, out_size, hidden_size, cell):
         self.layers = []
         self.X = X
         self.n_hlayers = len(hidden_size)
@@ -26,7 +27,10 @@ class RNN(object):
                 layer_input = self.layers[i - 1].activation
                 shape = (hidden_size[i - 1], hidden_size[i])
 
-            hidden_layer = GRULayer(shape, layer_input)
+            if cell == "gru":
+                hidden_layer = GRULayer(shape, layer_input)
+            elif cell == "lstm":
+                hidden_layer = LSTMLayer(shape, layer_input)
             self.layers.append(hidden_layer)
             self.params += hidden_layer.params
 
@@ -58,8 +62,3 @@ class RNN(object):
         self.train = theano.function(inputs = [X, Y, lr], outputs = [cost], updates = updates)
         self.predict = theano.function(inputs = [X], outputs = [activation])
     
-    def train(self, X, Y, lr):
-        return self.train(X, Y, lr)
-
-    def predict(self, X):
-        return self.predict(X)

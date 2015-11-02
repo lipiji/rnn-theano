@@ -17,7 +17,7 @@ dim_x = len(w2i)
 dim_y = len(w2i)
 print dim_x, dim_y
 
-model = RNN(dim_x, dim_y, hidden_size)
+model = RNN(dim_x, dim_y, hidden_size, cell = "gru") # cell = "gru" or "lstm"
 
 start = time.time()
 for i in xrange(100):
