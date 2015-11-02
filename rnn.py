@@ -9,11 +9,14 @@ from lstm import *
 from updates import *
 
 class RNN(object):
-    def __init__(self, in_size, out_size, hidden_size, cell = "gru"):
+    def __init__(self, in_size, out_size, hidden_size, cell = "gru", p = 0.5):
         X = T.matrix("X")
         self.n_hlayers = len(hidden_size)
         self.layers = []
         self.params = []
+        self.is_train = T.iscalar('is_train') # for dropout
+
+        rng = np.random.RandomState(1234)
 
         for i in xrange(self.n_hlayers):
             if i == 0:
@@ -24,9 +27,9 @@ class RNN(object):
                 shape = (hidden_size[i - 1], hidden_size[i])
 
             if cell == "gru":
-                hidden_layer = GRULayer(shape, layer_input)
+                hidden_layer = GRULayer(rng, shape, layer_input, self.is_train, p)
             elif cell == "lstm":
-                hidden_layer = LSTMLayer(shape, layer_input)
+                hidden_layer = LSTMLayer(rng, shape, layer_input, self.is_train, p)
             self.layers.append(hidden_layer)
             self.params += hidden_layer.params
 
@@ -54,7 +57,7 @@ class RNN(object):
         #updates = adagrad(self.params, gparams, lr)
         #updates = dadelta(self.params, gparams, lr)
         #updates = adam(self.params, gparams, lr)
-
-        self.train = theano.function(inputs = [X, Y, lr], outputs = [cost], updates = updates)
-        self.predict = theano.function(inputs = [X], outputs = [activation])
+        
+        self.train = theano.function(inputs = [X, Y, lr], givens={self.is_train : np.cast['int32'](1)}, outputs = [cost], updates = updates)
+        self.predict = theano.function(inputs = [X], givens={self.is_train : np.cast['int32'](0)}, outputs = [activation])
     
