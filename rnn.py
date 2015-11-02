@@ -11,12 +11,8 @@ from updates import *
 class RNN(object):
     def __init__(self, in_size, out_size, hidden_size, cell = "gru"):
         X = T.matrix("X")
-        self.create_model(X, in_size, out_size, hidden_size, cell)
-
-    def create_model(self, X, in_size, out_size, hidden_size, cell):
-        self.layers = []
-        self.X = X
         self.n_hlayers = len(hidden_size)
+        self.layers = []
         self.params = []
 
         for i in xrange(self.n_hlayers):
