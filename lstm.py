@@ -5,27 +5,29 @@ import theano.tensor as T
 from utils_pg import *
 
 class LSTMLayer(object):
-    def __init__(self, rng, shape, X, is_train = 1, p = 0.5):
+    def __init__(self, rng, layer_id, shape, X, is_train = 1, p = 0.5):
+        prefix = "LSTM_"
+        layer_id = "_" + layer_id
         self.in_size, self.out_size = shape
         
-        self.W_xi = init_weights((self.in_size, self.out_size))
-        self.W_hi = init_weights((self.out_size, self.out_size))
-        self.W_ci = init_weights((self.out_size, self.out_size))
-        self.b_i = init_bias(self.out_size)
+        self.W_xi = init_weights((self.in_size, self.out_size), prefix + "W_xi" + layer_id)
+        self.W_hi = init_weights((self.out_size, self.out_size), prefix + "W_hi" + layer_id)
+        self.W_ci = init_weights((self.out_size, self.out_size), prefix + "W_ci" + layer_id)
+        self.b_i = init_bias(self.out_size, prefix + "b_i" + layer_id)
         
-        self.W_xf = init_weights((self.in_size, self.out_size))
-        self.W_hf = init_weights((self.out_size, self.out_size))
-        self.W_cf = init_weights((self.out_size, self.out_size))
-        self.b_f = init_bias(self.out_size)
+        self.W_xf = init_weights((self.in_size, self.out_size), prefix + "W_xf" + layer_id)
+        self.W_hf = init_weights((self.out_size, self.out_size), prefix + "W_hf" + layer_id)
+        self.W_cf = init_weights((self.out_size, self.out_size), prefix + "W_cf" + layer_id)
+        self.b_f = init_bias(self.out_size, prefix + "b_f" + layer_id)
 
-        self.W_xc = init_weights((self.in_size, self.out_size))
-        self.W_hc = init_weights((self.out_size, self.out_size))
-        self.b_c = init_bias(self.out_size)
+        self.W_xc = init_weights((self.in_size, self.out_size), prefix + "W_xc" + layer_id)
+        self.W_hc = init_weights((self.out_size, self.out_size), prefix + "W_hc" + layer_id)
+        self.b_c = init_bias(self.out_size, prefix + "b_c" + layer_id)
 
-        self.W_xo = init_weights((self.in_size, self.out_size))
-        self.W_ho = init_weights((self.out_size, self.out_size))
-        self.W_co = init_weights((self.out_size, self.out_size))
-        self.b_o = init_bias(self.out_size)
+        self.W_xo = init_weights((self.in_size, self.out_size), prefix + "W_xo" + layer_id)
+        self.W_ho = init_weights((self.out_size, self.out_size), prefix + "W_ho" + layer_id)
+        self.W_co = init_weights((self.out_size, self.out_size), prefix + "W_co" + layer_id)
+        self.b_o = init_bias(self.out_size, prefix + "b_o" + layer_id)
 
         self.X = X
         

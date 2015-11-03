@@ -6,6 +6,7 @@ import theano.tensor as T
 from softmax import *
 from gru import *
 from lstm import *
+from logistic import *
 from updates import *
 
 class RNN(object):
@@ -27,11 +28,15 @@ class RNN(object):
                 shape = (hidden_size[i - 1], hidden_size[i])
 
             if cell == "gru":
-                hidden_layer = GRULayer(rng, shape, layer_input, self.is_train, p)
+                hidden_layer = GRULayer(rng, str(i), shape, layer_input, self.is_train, p)
             elif cell == "lstm":
-                hidden_layer = LSTMLayer(rng, shape, layer_input, self.is_train, p)
+                hidden_layer = LSTMLayer(rng, str(i), shape, layer_input, self.is_train, p)
             self.layers.append(hidden_layer)
             self.params += hidden_layer.params
+
+        #hidden_layer = LogisticLayer(str(i + 1), (hidden_layer.out_size, hidden_layer.out_size), hidden_layer.activation)
+        #self.layers.append(hidden_layer)
+        #self.params += hidden_layer.params
 
         output_layer = SoftmaxLayer((hidden_layer.out_size, out_size), hidden_layer.activation)
         self.layers.append(output_layer)
