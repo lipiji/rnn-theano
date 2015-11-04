@@ -20,7 +20,7 @@ def momentum(params, gparams, learning_rate = 0.1, momentum = 0.9):
         updates.append((p, p + x))
     return updates
 
-def rmsprop(params, gparams, learning_rate = 0.01, rho = 0.9, epsilon = 1e-6):
+def rmsprop(params, gparams, learning_rate = 0.001, rho = 0.9, epsilon = 1e-6):
     updates = []
     for p, g in zip(params, gparams):
         v = p.get_value(borrow = True)
@@ -30,7 +30,7 @@ def rmsprop(params, gparams, learning_rate = 0.01, rho = 0.9, epsilon = 1e-6):
         updates.append((p, p - learning_rate * g / T.sqrt(acc_new + epsilon)))
     return updates
 
-def adagrad(params, gparams, learning_rate = 1.0, epsilon = 1e-6):
+def adagrad(params, gparams, learning_rate = 0.01, epsilon = 1e-6):
     updates = []
     for p, g in zip(params, gparams):
         v = p.get_value(borrow = True)

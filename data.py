@@ -8,7 +8,7 @@ import cPickle, gzip
 
 curr_path = os.path.dirname(os.path.abspath(os.path.expanduser(__file__)))
 
-def char_sequence(f_path = None):
+def char_sequence(f_path = None, batch_size = 1):
     seqs = []
     i2w = {}
     w2i = {}
@@ -34,9 +34,48 @@ def char_sequence(f_path = None):
         for j in range(0, len(line)):
             x[j, w2i[line[j]]] = 1
         seqs.append(np.asmatrix(x))
-    print "#dic = " + str(len(w2i))
-    return seqs, i2w, w2i
 
+    data_xy = {}
+    batch_x = []
+    batch_y = []
+    seqs_len = []
+    batch_id = 0
+    zeros_m = np.zeros((1, len(w2i)), dtype = theano.config.floatX)
+    for i in xrange(len(seqs)):
+        seq = seqs[i];
+        X = seq[0 : len(seq) - 1, ]
+        Y = seq[1 : len(seq), ]
+        batch_x.append(X)
+        seqs_len.append(X.shape[0])
+        batch_y.append(Y)
+
+        if len(batch_x) == batch_size or (i == len(seqs) - 1):
+            max_len = np.max(seqs_len);
+            mask = np.zeros((max_len, len(batch_x) * len(w2i)), dtype = theano.config.floatX)
+            
+            concat_X = []
+            concat_Y = []
+            for b_i in xrange(len(batch_x)):
+                X = batch_x[b_i]
+                Y = batch_y[b_i]
+                for r in xrange(max_len - X.shape[0]):
+                    X = np.concatenate((X, zeros_m), axis=0)
+                    Y = np.concatenate((Y, zeros_m), axis=0)
+                if b_i == 0:
+                    concat_X = X
+                    concat_Y = Y
+                else:
+                    concat_X = np.concatenate((concat_X, X), axis=1)
+                    concat_Y = np.concatenate((concat_Y, Y), axis=1)
+
+            data_xy[batch_id] = [concat_X, concat_Y, len(batch_x)]
+            batch_x = []
+            batch_y = []
+            seqs_len = []
+            batch_id += 1
+
+    print "#dic = " + str(len(w2i))
+    return seqs, i2w, w2i, data_xy
 
 #data: http://deeplearning.net/data/mnist/mnist.pkl.gz
 def mnist(batch_size = 1):

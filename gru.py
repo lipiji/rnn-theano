@@ -5,7 +5,7 @@ import theano.tensor as T
 from utils_pg import *
 
 class GRULayer(object):
-    def __init__(self, rng, layer_id, shape, X, is_train = 1, p = 0.5):
+    def __init__(self, rng, layer_id, shape, X, is_train = 1, batch_size = 1, p = 0.5):
         prefix = "GRU_"
         layer_id = "_" + layer_id
         self.in_size, self.out_size = shape
@@ -23,18 +23,22 @@ class GRULayer(object):
         self.b_h = init_bias(self.out_size, prefix + "b_h" + layer_id)
 
         self.X = X
-
+        
         def _active(x, pre_h):
+            x = T.reshape(x, (batch_size, self.in_size))
+            pre_h = T.reshape(pre_h, (batch_size, self.out_size))
             r = T.nnet.sigmoid(T.dot(x, self.W_xr) + T.dot(pre_h, self.W_hr) + self.b_r)
             z = T.nnet.sigmoid(T.dot(x, self.W_xz) + T.dot(pre_h, self.W_hz) + self.b_z)
             gh = T.tanh(T.dot(x, self.W_xh) + T.dot(r * pre_h, self.W_hh) + self.b_h)
             h = z * pre_h + (1 - z) * gh
+
+            h = T.reshape(h, (1, batch_size * self.out_size))
             return h
         h, updates = theano.scan(_active, sequences = [self.X],
-                                 outputs_info = [T.alloc(floatX(0.), 1, self.out_size)])
+                                 outputs_info = [T.alloc(floatX(0.), 1, batch_size *self.out_size)])
         #outputs_info = [dict(initial = T.zeros([1, self.out_size], dtype = self.X.dtype))]
        
-        h = T.reshape(h, (self.X.shape[0], self.out_size))
+        h = T.reshape(h, (self.X.shape[0], batch_size * self.out_size))
         # dropout
         if p > 0:
             srng = T.shared_randomstreams.RandomStreams(rng.randint(999999))

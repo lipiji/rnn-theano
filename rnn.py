@@ -16,7 +16,8 @@ class RNN(object):
         self.layers = []
         self.params = []
         self.is_train = T.iscalar('is_train') # for dropout
-
+        self.batch_size = T.iscalar('batch_size') # for mini-batch training
+        
         rng = np.random.RandomState(1234)
 
         for i in xrange(self.n_hlayers):
@@ -28,9 +29,9 @@ class RNN(object):
                 shape = (hidden_size[i - 1], hidden_size[i])
 
             if cell == "gru":
-                hidden_layer = GRULayer(rng, str(i), shape, layer_input, self.is_train, p)
+                hidden_layer = GRULayer(rng, str(i), shape, layer_input, self.is_train, self.batch_size, p)
             elif cell == "lstm":
-                hidden_layer = LSTMLayer(rng, str(i), shape, layer_input, self.is_train, p)
+                hidden_layer = LSTMLayer(rng, str(i), shape, layer_input, self.is_train, self.batch_size, p)
             self.layers.append(hidden_layer)
             self.params += hidden_layer.params
 
@@ -38,7 +39,7 @@ class RNN(object):
         #self.layers.append(hidden_layer)
         #self.params += hidden_layer.params
 
-        output_layer = SoftmaxLayer((hidden_layer.out_size, out_size), hidden_layer.activation)
+        output_layer = SoftmaxLayer((hidden_layer.out_size, out_size), hidden_layer.activation, self.batch_size)
         self.layers.append(output_layer)
 
         self.params += output_layer.params
@@ -63,6 +64,6 @@ class RNN(object):
         #updates = dadelta(self.params, gparams, lr)
         #updates = adam(self.params, gparams, lr)
         
-        self.train = theano.function(inputs = [X, Y, lr], givens={self.is_train : np.cast['int32'](1)}, outputs = [cost], updates = updates)
-        self.predict = theano.function(inputs = [X], givens={self.is_train : np.cast['int32'](0)}, outputs = [activation])
+        self.train = theano.function(inputs = [X, Y, lr, self.batch_size], givens={self.is_train : np.cast['int32'](1)}, outputs = [cost], updates = updates)
+        self.predict = theano.function(inputs = [X, self.batch_size], givens={self.is_train : np.cast['int32'](0)}, outputs = [activation])
     

@@ -9,11 +9,12 @@ from rnn import *
 
 import data
 
-seqs, i2w, w2i, data_xy = data.char_sequence("/data/toy.txt", batch_size=2)
+batch_size = 3
+seqs, i2w, w2i, data_xy = data.char_sequence("/data/toy.txt", batch_size)
 
 e = 0.01
 lr = 0.01
-batch_size = 100
+
 hidden_size = [100, 100]
 
 dim_x = len(w2i)
@@ -31,11 +32,11 @@ g_error = 9999.9999
 for i in xrange(100):
     error = 0.0
     in_start = time.time()
-    for s in xrange(len(seqs)):
-        seq = seqs[s]
-        X = seq[0 : len(seq) - 1, ] 
-        Y = seq[1 : len(seq), ]
-        cost = model.train(X, Y, lr)[0]
+    for batch_id, xy in data_xy.items():
+        X = xy[0] 
+        Y = xy[1]
+        local_batch_size = xy[2]
+        cost = model.train(X, Y, lr, local_batch_size)[0]
         error += cost
         #print i, g_error, s, "/", len(seqs), cost
     in_time = time.time() - in_start
@@ -65,7 +66,7 @@ for s in xrange(len(seqs)):
     X = seq[0 : len(seq) - 1, ] 
     Y = seq[1 : len(seq), ]
     label = np.argmax(Y, axis=1)
-    p_label = np.argmax(loaded_model.predict(X)[0], axis=1)
+    p_label = np.argmax(loaded_model.predict(X, 1)[0], axis=1)
 
     print i2w[np.argmax(X[0,])], 
     for c in xrange(len(label)):
