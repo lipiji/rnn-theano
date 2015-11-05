@@ -51,7 +51,7 @@ def char_sequence(f_path = None, batch_size = 1):
 
         if len(batch_x) == batch_size or (i == len(seqs) - 1):
             max_len = np.max(seqs_len);
-            mask = np.zeros((max_len, len(batch_x) * len(w2i)), dtype = theano.config.floatX)
+            mask = np.zeros((max_len, len(batch_x)), dtype = theano.config.floatX)
             
             concat_X = []
             concat_Y = []
@@ -67,8 +67,10 @@ def char_sequence(f_path = None, batch_size = 1):
                 else:
                     concat_X = np.concatenate((concat_X, X), axis=1)
                     concat_Y = np.concatenate((concat_Y, Y), axis=1)
+                
+                mask[0 : X.shape[0], b_i] = 1
 
-            data_xy[batch_id] = [concat_X, concat_Y, len(batch_x)]
+            data_xy[batch_id] = [concat_X, concat_Y, mask, len(batch_x)]
             batch_x = []
             batch_y = []
             seqs_len = []

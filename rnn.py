@@ -11,27 +11,29 @@ from updates import *
 
 class RNN(object):
     def __init__(self, in_size, out_size, hidden_size, cell = "gru", p = 0.5):
-        X = T.matrix("X")
+        self.X = T.matrix("X")
+
         self.n_hlayers = len(hidden_size)
         self.layers = []
         self.params = []
         self.is_train = T.iscalar('is_train') # for dropout
         self.batch_size = T.iscalar('batch_size') # for mini-batch training
+        self.mask = T.matrix("mask")
         
         rng = np.random.RandomState(1234)
 
         for i in xrange(self.n_hlayers):
             if i == 0:
-                layer_input = X
+                layer_input = self.X
                 shape = (in_size, hidden_size[0])
             else:
                 layer_input = self.layers[i - 1].activation
                 shape = (hidden_size[i - 1], hidden_size[i])
 
             if cell == "gru":
-                hidden_layer = GRULayer(rng, str(i), shape, layer_input, self.is_train, self.batch_size, p)
+                hidden_layer = GRULayer(rng, str(i), shape, layer_input, self.mask, self.is_train, self.batch_size, p)
             elif cell == "lstm":
-                hidden_layer = LSTMLayer(rng, str(i), shape, layer_input, self.is_train, self.batch_size, p)
+                hidden_layer = LSTMLayer(rng, str(i), shape, layer_input, self.mask, self.is_train, self.batch_size, p)
             self.layers.append(hidden_layer)
             self.params += hidden_layer.params
 
@@ -44,12 +46,12 @@ class RNN(object):
 
         self.params += output_layer.params
 
-        self.create_funs(X)
+        self.create_funs()
     
-    def create_funs(self, X):
+    def create_funs(self):
         activation = self.layers[len(self.layers) - 1].activation
-        Y = T.matrix("Y")
-        cost = T.mean(T.nnet.categorical_crossentropy(activation, Y))
+        self.Y = T.matrix("Y")
+        cost = T.mean(T.nnet.categorical_crossentropy(activation, self.Y))
         gparams = []
         for param in self.params:
             gparam = T.grad(cost, param)
@@ -64,6 +66,11 @@ class RNN(object):
         #updates = dadelta(self.params, gparams, lr)
         #updates = adam(self.params, gparams, lr)
         
-        self.train = theano.function(inputs = [X, Y, lr, self.batch_size], givens={self.is_train : np.cast['int32'](1)}, outputs = [cost], updates = updates)
-        self.predict = theano.function(inputs = [X, self.batch_size], givens={self.is_train : np.cast['int32'](0)}, outputs = [activation])
+        self.train = theano.function(inputs = [self.X, self.mask, self.Y, lr, self.batch_size],
+                                               givens = {self.is_train : np.cast['int32'](1)},
+                                               outputs = [cost],
+                                               updates = updates)
+        self.predict = theano.function(inputs = [self.X, self.mask, self.batch_size],
+                                                 givens = {self.is_train : np.cast['int32'](0)},
+                                                 outputs = [activation])
     
