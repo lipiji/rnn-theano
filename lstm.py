@@ -51,8 +51,8 @@ class LSTMLayer(object):
             return h, c
         [h, c], updates = theano.scan(_active,
                                       sequences = [self.X, self.M],
-                                      outputs_info = [T.alloc(floatX(0.), 1, self.out_size),
-                                                      T.alloc(floatX(0.), 1, self.out_size)])
+                                      outputs_info = [T.alloc(floatX(0.), 1, batch_size * self.out_size),
+                                                      T.alloc(floatX(0.), 1, batch_size * self.out_size)])
         
         h = T.reshape(h, (self.X.shape[0], batch_size * self.out_size))
         # dropout

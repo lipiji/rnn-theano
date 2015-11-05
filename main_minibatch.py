@@ -6,24 +6,26 @@ import theano
 import theano.tensor as T
 from utils_pg import *
 from rnn import *
-
 import data
 
-batch_size = 3
-seqs, i2w, w2i, data_xy = data.char_sequence("/data/toy.txt", batch_size)
-
 e = 0.01
-lr = 0.008
-hidden_size = [100, 100]
+lr = 0.0005
+drop_rate = 0.
+batch_size = 1000
+hidden_size = [512, 512]
+# try: gru, lstm
+cell = "gru"
+# try: sgd, momentum, rmsprop, adagrad, dadelta, adam
+optimizer = "rmsprop" 
 
+
+seqs, i2w, w2i, data_xy = data.char_sequence("/data/shakespeare.txt", batch_size)
 dim_x = len(w2i)
 dim_y = len(w2i)
-print dim_x, dim_y
+print "#features = ", dim_x, "#labels = ", dim_y
 
-cell = "gru" # cell = "gru" or "lstm"
-
-print "building..."
-model = RNN(dim_x, dim_y, hidden_size, cell, p = 0.)
+print "compiling..."
+model = RNN(dim_x, dim_y, hidden_size, cell, optimizer, drop_rate)
 
 print "training..."
 start = time.time()
