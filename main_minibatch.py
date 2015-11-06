@@ -9,14 +9,14 @@ from rnn import *
 import data
 
 e = 0.01
-lr = 0.0005
+lr = 0.1
 drop_rate = 0.
 batch_size = 1000
 hidden_size = [512, 512]
 # try: gru, lstm
 cell = "gru"
 # try: sgd, momentum, rmsprop, adagrad, dadelta, adam
-optimizer = "rmsprop" 
+optimizer = "dadelta" 
 
 
 seqs, i2w, w2i, data_xy = data.char_sequence("/data/shakespeare.txt", batch_size)

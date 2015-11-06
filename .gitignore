@@ -1,3 +1,4 @@
 *.pyc
 /data/shakespeare.txt
 /model/rnn*
+/model/char*
