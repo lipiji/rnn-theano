@@ -8,16 +8,17 @@ from utils_pg import *
 from rnn import *
 import data
 
+use_gpu(0)
+
 e = 0.01
 lr = 0.1
 drop_rate = 0.
-batch_size = 1000
-hidden_size = [512, 512]
+batch_size = 1024
+hidden_size = [500, 400, 400]
 # try: gru, lstm
 cell = "gru"
 # try: sgd, momentum, rmsprop, adagrad, dadelta, adam
 optimizer = "dadelta" 
-
 
 seqs, i2w, w2i, data_xy = data.char_sequence("/data/shakespeare.txt", batch_size)
 dim_x = len(w2i)
