@@ -40,7 +40,7 @@ def adagrad(params, gparams, learning_rate = 0.01, epsilon = 1e-6):
         updates.append((p, p - learning_rate * g / T.sqrt(acc_new + epsilon)))
     return updates
 
-def dadelta(params, gparams, learning_rate = 1.0, rho = 0.95, epsilon = 1e-6):
+def adadelta(params, gparams, learning_rate = 1.0, rho = 0.95, epsilon = 1e-6):
     updates = []
     for p, g in zip(params, gparams):
         v = p.get_value(borrow = True)

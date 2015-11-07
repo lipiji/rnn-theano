@@ -17,8 +17,8 @@ batch_size = 1024
 hidden_size = [500, 400, 400]
 # try: gru, lstm
 cell = "gru"
-# try: sgd, momentum, rmsprop, adagrad, dadelta, adam
-optimizer = "dadelta" 
+# try: sgd, momentum, rmsprop, adagrad, adadelta, adam
+optimizer = "adadelta" 
 
 seqs, i2w, w2i, data_xy = data.char_sequence("/data/shakespeare.txt", batch_size)
 dim_x = len(w2i)
@@ -31,7 +31,7 @@ model = RNN(dim_x, dim_y, hidden_size, cell, optimizer, drop_rate)
 print "training..."
 start = time.time()
 g_error = 9999.9999
-for i in xrange(100):
+for i in xrange(1000):
     error = 0.0
     in_start = time.time()
     for batch_id, xy in data_xy.items():

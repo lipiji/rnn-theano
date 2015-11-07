@@ -18,8 +18,8 @@ batch_size = 50
 hidden_size = [400, 400]
 # try: gru, lstm
 cell = "gru"
-# try: sgd, momentum, rmsprop, adagrad, dadelta, adam
-optimizer = "dadelta" 
+# try: sgd, momentum, rmsprop, adagrad, adadelta, adam
+optimizer = "adadelta" 
 
 seqs, i2w, w2i, data_xy = data.load_hlm("/data/hlm/hlm.txt", batch_size)
 dim_x = len(w2i)
