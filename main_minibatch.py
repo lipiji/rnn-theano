@@ -11,10 +11,10 @@ import data
 use_gpu(0)
 
 e = 0.01
-lr = 0.1
+lr = 0.2
 drop_rate = 0.
 batch_size = 1024
-hidden_size = [500, 400, 400]
+hidden_size = [500, 500, 500]
 # try: gru, lstm
 cell = "gru"
 # try: sgd, momentum, rmsprop, adagrad, adadelta, adam
@@ -31,7 +31,7 @@ model = RNN(dim_x, dim_y, hidden_size, cell, optimizer, drop_rate)
 print "training..."
 start = time.time()
 g_error = 9999.9999
-for i in xrange(1000):
+for i in xrange(200):
     error = 0.0
     in_start = time.time()
     for batch_id, xy in data_xy.items():
