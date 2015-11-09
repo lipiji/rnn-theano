@@ -47,7 +47,8 @@ def batch_sequences(seqs, i2w, w2i, batch_size):
     batch_y = []
     seqs_len = []
     batch_id = 0
-    zeros_m = np.zeros((1, len(w2i)), dtype = theano.config.floatX)
+    dim = len(w2i)
+    zeros_m = np.zeros((1, dim), dtype = theano.config.floatX)
     for i in xrange(len(seqs)):
         seq = seqs[i];
         X = seq[0 : len(seq) - 1, ]
@@ -60,23 +61,25 @@ def batch_sequences(seqs, i2w, w2i, batch_size):
             max_len = np.max(seqs_len);
             mask = np.zeros((max_len, len(batch_x)), dtype = theano.config.floatX)
             
-            concat_X = []
-            concat_Y = []
+            concat_X = np.zeros((max_len, len(batch_x) * dim), dtype = theano.config.floatX)
+            concat_Y = concat_X.copy()
             for b_i in xrange(len(batch_x)):
                 X = batch_x[b_i]
                 Y = batch_y[b_i]
+                mask[0 : X.shape[0], b_i] = 1
                 for r in xrange(max_len - X.shape[0]):
                     X = np.concatenate((X, zeros_m), axis=0)
                     Y = np.concatenate((Y, zeros_m), axis=0)
+                concat_X[:, b_i * dim : (b_i + 1) * dim] = X 
+                concat_Y[:, b_i * dim : (b_i + 1) * dim] = Y
+                '''
                 if b_i == 0:
                     concat_X = X
                     concat_Y = Y
                 else:
                     concat_X = np.concatenate((concat_X, X), axis=1)
                     concat_Y = np.concatenate((concat_Y, Y), axis=1)
-                
-                mask[0 : X.shape[0], b_i] = 1
-
+                '''
             data_xy[batch_id] = [concat_X, concat_Y, mask, len(batch_x)]
             batch_x = []
             batch_y = []

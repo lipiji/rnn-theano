@@ -11,10 +11,10 @@ import data
 use_gpu(0)
 
 e = 0.01
-lr = 0.2
+lr = 0.1
 drop_rate = 0.
 batch_size = 1024
-hidden_size = [500, 500, 500]
+hidden_size = [500, 400, 300]
 # try: gru, lstm
 cell = "gru"
 # try: sgd, momentum, rmsprop, adagrad, adadelta, adam
@@ -56,11 +56,11 @@ for i in xrange(200):
 print "Finished. Time = " + str(time.time() - start)
 
 print "save model..."
-save_model("./model/rnn.model", model)
+save_model("./model/char_rnn.model", model)
 
 print "load model..."
 loaded_model = RNN(dim_x, dim_y, hidden_size, cell)
-loaded_model = load_model("./model/rnn.model", loaded_model)
+loaded_model = load_model("./model/char_rnn.model", loaded_model)
 
 num_x = 0.0
 acc = 0.0

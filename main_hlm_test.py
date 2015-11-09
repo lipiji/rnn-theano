@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #pylint: skip-file
 import time
 import sys
@@ -7,25 +8,26 @@ import theano.tensor as T
 from utils_pg import *
 from rnn import *
 
-use_gpu(0)
+#use_gpu(0)
 
 import data
 drop_rate = 0.
-batch_size = 1000
-seqs, i2w, w2i, data_xy = data.char_sequence("/data/shakespeare.txt", batch_size)
-hidden_size = [500, 500, 500]
+batch_size = 1
+seqs, i2w, w2i, data_xy = data.load_hlm("/data/hlm/hlm.txt", batch_size)
+hidden_size = [400, 400]
 dim_x = len(w2i)
 dim_y = len(w2i)
 print dim_x, dim_y
 
 cell = "gru" # cell = "gru" or "lstm"
-optimizer = "adadelta"
+optimizer = "sgd"
 
 print "building..."
 model = RNN(dim_x, dim_y, hidden_size, cell, optimizer, drop_rate)
 print "load model..."
-model = load_model("./model/char_rnn.model", model)
+model = load_model("./model/rnn_hlm.model", model)
 
+'''
 num_x = 0.0
 acc = 0.0
 for s in xrange(len(seqs)):
@@ -43,9 +45,10 @@ for s in xrange(len(seqs)):
         print i2w[p_label[c]],
     print "\n",
 print "Accuracy = " + str(acc / num_x)
+'''
 
 X = np.zeros((1, dim_x), np.float32)
-a = "a"
+a = "贾宝玉"
 X[0, w2i[a]] = 1
 print a,
 for i in xrange(100):
