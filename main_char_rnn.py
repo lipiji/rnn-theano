@@ -13,7 +13,7 @@ import data
 drop_rate = 0.
 batch_size = 1000
 seqs, i2w, w2i, data_xy = data.char_sequence("/data/shakespeare.txt", batch_size)
-hidden_size = [500, 500, 500]
+hidden_size = [500, 400, 300]
 dim_x = len(w2i)
 dim_y = len(w2i)
 print dim_x, dim_y

@@ -8,7 +8,7 @@ import theano.tensor as T
 from utils_pg import *
 from rnn import *
 
-#use_gpu(0)
+use_gpu(1)
 
 import data
 drop_rate = 0.
@@ -48,7 +48,7 @@ print "Accuracy = " + str(acc / num_x)
 '''
 
 X = np.zeros((1, dim_x), np.float32)
-a = "贾宝玉"
+a = u"贾宝玉"
 X[0, w2i[a]] = 1
 print a,
 for i in xrange(100):

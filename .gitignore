@@ -1,4 +1,3 @@
 *.pyc
-/data/shakespeare.txt
+/data/*
 /model/*
-/data/hlm/*

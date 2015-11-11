@@ -9,7 +9,7 @@ from rnn import *
 import data
 
 # set use gpu programatically
-use_gpu(1)
+use_gpu(0)
 
 e = 0.01
 lr = 0.1

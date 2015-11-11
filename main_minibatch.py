@@ -31,7 +31,7 @@ model = RNN(dim_x, dim_y, hidden_size, cell, optimizer, drop_rate)
 print "training..."
 start = time.time()
 g_error = 9999.9999
-for i in xrange(200):
+for i in xrange(100):
     error = 0.0
     in_start = time.time()
     for batch_id, xy in data_xy.items():
