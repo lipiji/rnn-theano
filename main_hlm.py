@@ -27,6 +27,7 @@ dim_y = len(w2i)
 print "#features = ", dim_x, "#labels = ", dim_y
 print "compiling..."
 model = RNN(dim_x, dim_y, hidden_size, cell, optimizer, drop_rate)
+model = load_model("./model/rnn_hlm.model", model)
 
 print "training..."
 start = time.time()
@@ -54,8 +55,4 @@ print "Finished. Time = " + str(time.time() - start)
 
 print "save model..."
 save_model("./model/rnn_hlm.model", model)
-
-print "load model..."
-loaded_model = RNN(dim_x, dim_y, hidden_size, cell)
-loaded_model = load_model("./model/rnn_hlm.model", loaded_model)
 

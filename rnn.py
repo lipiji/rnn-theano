@@ -53,11 +53,17 @@ class RNN(object):
                                     hidden_layer.activation, self.batch_size)
         self.layers.append(output_layer)
         self.params += output_layer.params
-    
+   
+    # https://github.com/fchollet/keras/pull/9/files
+        self.epsilon = 1.0e-15
+    def categorical_crossentropy(self, y_pred, y_true):
+        y_pred = T.clip(y_pred, self.epsilon, 1.0 - self.epsilon)
+        return T.nnet.categorical_crossentropy(y_pred, y_true).mean()
+
     def define_train_test_funcs(self):
         activation = self.layers[len(self.layers) - 1].activation
         self.Y = T.matrix("Y")
-        cost = T.mean(T.nnet.categorical_crossentropy(activation, self.Y))
+        cost = self.categorical_crossentropy(activation, self.Y)
         gparams = []
         for param in self.params:
             gparam = T.grad(cost, param)

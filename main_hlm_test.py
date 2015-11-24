@@ -20,12 +20,12 @@ dim_y = len(w2i)
 print dim_x, dim_y
 
 cell = "gru" # cell = "gru" or "lstm"
-optimizer = "sgd"
+optimizer = "adadelta"
 
 print "building..."
 model = RNN(dim_x, dim_y, hidden_size, cell, optimizer, drop_rate)
 print "load model..."
-model = load_model("./model/rnn_hlm.model", model)
+model = load_model("./model/rnn_hlm.model_76", model)
 
 '''
 num_x = 0.0
@@ -48,10 +48,36 @@ print "Accuracy = " + str(acc / num_x)
 '''
 
 X = np.zeros((1, dim_x), np.float32)
-a = u"贾宝玉"
+a = u"宝玉"
 X[0, w2i[a]] = 1
 print a,
-for i in xrange(100):
+for i in xrange(200):
+    Y = model.predict(X, np.ones((X.shape[0], 1), np.float32),  1)[0]
+    Y = Y[Y.shape[0] - 1,:]
+    p_label = np.argmax(Y)
+    print i2w[p_label],
+    X = np.concatenate((X, np.reshape(Y, (1, len(Y)))), axis=0)
+
+print "\n"
+
+X = np.zeros((1, dim_x), np.float32)
+a = u"黛玉"
+X[0, w2i[a]] = 1
+print a,
+for i in xrange(200):
+    Y = model.predict(X, np.ones((X.shape[0], 1), np.float32),  1)[0]
+    Y = Y[Y.shape[0] - 1,:]
+    p_label = np.argmax(Y)
+    print i2w[p_label],
+    X = np.concatenate((X, np.reshape(Y, (1, len(Y)))), axis=0)
+
+print "\n"
+
+X = np.zeros((1, dim_x), np.float32)
+a = u"宝钗"
+X[0, w2i[a]] = 1
+print a,
+for i in xrange(200):
     Y = model.predict(X, np.ones((X.shape[0], 1), np.float32),  1)[0]
     Y = Y[Y.shape[0] - 1,:]
     p_label = np.argmax(Y)

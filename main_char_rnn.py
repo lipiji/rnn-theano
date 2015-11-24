@@ -11,9 +11,9 @@ use_gpu(0)
 
 import data
 drop_rate = 0.
-batch_size = 1000
-seqs, i2w, w2i, data_xy = data.char_sequence("/data/shakespeare.txt", batch_size)
-hidden_size = [500, 400, 300]
+batch_size = 20
+seqs, i2w, w2i, data_xy = data.char_sequence("/data/toy.txt", batch_size)
+hidden_size = [100, 100]
 dim_x = len(w2i)
 dim_y = len(w2i)
 print dim_x, dim_y
@@ -23,8 +23,7 @@ optimizer = "adadelta"
 
 print "building..."
 model = RNN(dim_x, dim_y, hidden_size, cell, optimizer, drop_rate)
-print "load model..."
-model = load_model("./model/char_rnn.model", model)
+model = load_model("./model/char_rnn.model", model) 
 
 num_x = 0.0
 acc = 0.0
@@ -45,7 +44,7 @@ for s in xrange(len(seqs)):
 print "Accuracy = " + str(acc / num_x)
 
 X = np.zeros((1, dim_x), np.float32)
-a = "a"
+a = "r"
 X[0, w2i[a]] = 1
 print a,
 for i in xrange(100):
