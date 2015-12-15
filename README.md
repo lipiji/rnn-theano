@@ -1,2 +1,2 @@
 ###RNN(LSTM, GRU) using Theano
- - python main.py
+ - main_char_train.py

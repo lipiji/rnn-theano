@@ -88,4 +88,5 @@ class RNN(object):
         self.predict = theano.function(inputs = [self.X, self.mask, self.batch_size],
                                                  givens = {self.is_train : np.cast['int32'](0)},
                                                  outputs = [activation])
-    
+  
+        #theano.printing.pydotprint(self.train, outfile="./model/train.png", var_with_name_simple=True) 
