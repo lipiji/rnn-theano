@@ -11,7 +11,7 @@ import data
 use_gpu(0)
 
 e = 0.01
-lr = 0.5
+lr = 0.8
 drop_rate = 0.
 batch_size = 20
 hidden_size = [100, 100]

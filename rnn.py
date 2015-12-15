@@ -66,7 +66,8 @@ class RNN(object):
         cost = self.categorical_crossentropy(activation, self.Y)
         gparams = []
         for param in self.params:
-            gparam = T.grad(cost, param)
+            #gparam = T.grad(cost, param)
+            gparam = T.clip(T.grad(cost, param), -10, 10)
             gparams.append(gparam)
 
         lr = T.scalar("lr")
