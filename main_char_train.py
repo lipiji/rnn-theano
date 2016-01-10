@@ -41,7 +41,6 @@ for i in xrange(200):
         local_batch_size = xy[3]
         cost = model.train(X, mask, Y, lr, local_batch_size)[0]
         error += cost
-        #print i, g_error, batch_id, "/", len(data_xy), cost
     in_time = time.time() - in_start
 
     error /= len(seqs);
@@ -49,7 +48,7 @@ for i in xrange(200):
         g_error = error
         save_model("./model/rnn.model_" + str(i), model)
 
-    print "Iter = " + str(i) + ", Error = " + str(error) + ", Time = " + str(in_time)
+    print "Iter = " + str(i) + ", Loss = " + str(error) + ", Time = " + str(in_time)
     if error <= e:
         break
 

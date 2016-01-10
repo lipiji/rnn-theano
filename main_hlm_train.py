@@ -47,7 +47,7 @@ for i in xrange(100):
         g_error = error
         save_model("./model/rnn_hlm.model_" + str(i), model)
 
-    print "Iter = " + str(i) + ", Error = " + str(error) + ", Time = " + str(in_time)
+    print "Iter = " + str(i) + ", Loss = " + str(error) + ", Time = " + str(in_time)
     if error <= e:
         break
 
