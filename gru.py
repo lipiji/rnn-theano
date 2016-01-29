@@ -35,11 +35,15 @@ class GRULayer(object):
             h = z * pre_h + (1 - z) * gh
             
             h = h * m[:, None]
+            # TODO: propagate the final state to the tail
+            # h = h * m[:, None] + (1 - m[:, None]) * pre_h
             
             h = T.reshape(h, (1, batch_size * self.out_size))
             return h
         h, updates = theano.scan(_active, sequences = [self.X, self.M],
                                  outputs_info = [T.alloc(floatX(0.), 1, batch_size * self.out_size)])
+                                 
+        # TODO: how to  get the matrix from the dic ?
         # dic to matrix 
         h = T.reshape(h, (self.X.shape[0], batch_size * self.out_size))
         
