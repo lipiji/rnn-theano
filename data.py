@@ -80,7 +80,7 @@ def batch_sequences(seqs, i2w, w2i, batch_size):
                     concat_X = np.concatenate((concat_X, X), axis=1)
                     concat_Y = np.concatenate((concat_Y, Y), axis=1)
                 '''
-            data_xy[batch_id] = [concat_X, concat_Y, mask, len(batch_x)]
+            data_xy[batch_id] = [concat_X, concat_Y, mask, mask, len(batch_x)]
             batch_x = []
             batch_y = []
             seqs_len = []

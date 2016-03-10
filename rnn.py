@@ -20,7 +20,8 @@ class RNN(object):
         self.drop_rate = p
         self.is_train = T.iscalar('is_train') # for dropout
         self.batch_size = T.iscalar('batch_size') # for mini-batch training
-        self.mask = T.matrix("mask")
+        self.maskX = T.matrix("maskX")
+        self.maskY = T.matrix("maskY")
         self.optimizer = optimizer
         self.define_layers()
         self.define_train_test_funcs()
@@ -40,10 +41,10 @@ class RNN(object):
 
             if self.cell == "gru":
                 hidden_layer = GRULayer(rng, str(i), shape, layer_input,
-                                        self.mask, self.is_train, self.batch_size, self.drop_rate)
+                                        self.maskX, self.is_train, self.batch_size, self.drop_rate)
             elif self.cell == "lstm":
                 hidden_layer = LSTMLayer(rng, str(i), shape, layer_input,
-                                         self.mask, self.is_train, self.batch_size, self.drop_rate)
+                                         self.maskX, self.is_train, self.batch_size, self.drop_rate)
             
             self.layers.append(hidden_layer)
             self.params += hidden_layer.params
@@ -58,12 +59,20 @@ class RNN(object):
         self.epsilon = 1.0e-15
     def categorical_crossentropy(self, y_pred, y_true):
         y_pred = T.clip(y_pred, self.epsilon, 1.0 - self.epsilon)
+        m = T.reshape(self.maskY, (self.maskY.shape[0] * self.batch_size, 1))
+        ce = T.nnet.categorical_crossentropy(y_pred, y_true)
+        ce = T.reshape(ce, (self.maskY.shape[0] * self.batch_size, 1))
+        return T.sum(ce * m) / T.sum(m)
+
         return T.nnet.categorical_crossentropy(y_pred, y_true).mean()
 
     def define_train_test_funcs(self):
         activation = self.layers[len(self.layers) - 1].activation
         self.Y = T.matrix("Y")
-        cost = self.categorical_crossentropy(activation, self.Y)
+        pYs = T.reshape(activation, (self.maskY.shape[0] * self.batch_size, self.out_size))
+        tYs =  T.reshape(self.Y, (self.maskY.shape[0] * self.batch_size, self.out_size))
+        cost = self.categorical_crossentropy(pYs, tYs)
+        
         gparams = []
         for param in self.params:
             #gparam = T.grad(cost, param)
@@ -82,12 +91,12 @@ class RNN(object):
         #updates = dadelta(self.params, gparams, lr)
         #updates = adam(self.params, gparams, lr)
         
-        self.train = theano.function(inputs = [self.X, self.mask, self.Y, lr, self.batch_size],
+        self.train = theano.function(inputs = [self.X, self.maskX, self.Y, self.maskY, lr, self.batch_size],
                                                givens = {self.is_train : np.cast['int32'](1)},
-                                               outputs = [cost],
+                                               outputs = cost,
                                                updates = updates)
-        self.predict = theano.function(inputs = [self.X, self.mask, self.batch_size],
+        self.predict = theano.function(inputs = [self.X, self.maskX, self.batch_size],
                                                  givens = {self.is_train : np.cast['int32'](0)},
-                                                 outputs = [activation])
+                                                 outputs = activation)
   
         #theano.printing.pydotprint(self.train, outfile="./model/train.png", var_with_name_simple=True) 

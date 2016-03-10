@@ -37,9 +37,10 @@ for i in xrange(200):
     for batch_id, xy in data_xy.items():
         X = xy[0] 
         Y = xy[1]
-        mask = xy[2]
-        local_batch_size = xy[3]
-        cost = model.train(X, mask, Y, lr, local_batch_size)[0]
+        maskX = xy[2]
+        maskY = xy[3]
+        local_batch_size = xy[4]
+        cost = model.train(X, maskX, Y, maskY, lr, local_batch_size)
         error += cost
     in_time = time.time() - in_start
 
