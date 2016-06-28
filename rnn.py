@@ -63,8 +63,7 @@ class RNN(object):
         ce = T.nnet.categorical_crossentropy(y_pred, y_true)
         ce = T.reshape(ce, (self.maskY.shape[0] * self.batch_size, 1))
         return T.sum(ce * m) / T.sum(m)
-
-        return T.nnet.categorical_crossentropy(y_pred, y_true).mean()
+        #return T.nnet.categorical_crossentropy(y_pred, y_true).mean()
 
     def define_train_test_funcs(self):
         activation = self.layers[len(self.layers) - 1].activation
