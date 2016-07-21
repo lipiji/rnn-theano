@@ -11,14 +11,14 @@ import data
 use_gpu(0)
 
 e = 0.01
-lr = 0.2
+lr = 1
 drop_rate = 0.
 batch_size = 20
 hidden_size = [100, 100]
 # try: gru, lstm
 cell = "gru"
 # try: sgd, momentum, rmsprop, adagrad, adadelta, adam, nesterov_momentum
-optimizer = "nesterov_momentum" 
+optimizer = "adadelta" 
 
 seqs, i2w, w2i, data_xy = data.char_sequence("/data/toy.txt", batch_size)
 dim_x = len(w2i)
