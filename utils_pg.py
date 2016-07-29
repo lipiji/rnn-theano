@@ -38,11 +38,14 @@ def init_weights(shape, name, sample = "xavier", scale = 0.01):
 def init_weights_2(shape, name, sample = "xavier", scale = 0.01, couple_axis = 1):
     if couple_axis in [0, 1]:
         if sample == "norm":
-            values = np.concatenate([norm_weight(shape, scale), norm_weight(shape, scale)], couple_axis)
+            values = np.concatenate([norm_weight(shape, scale),
+                                     norm_weight(shape, scale)], couple_axis)
         elif sample == "xavier":
-            values = np.concatenate([xavier_weight(shape), xavier_weight(shape)], couple_axis)
+            values = np.concatenate([xavier_weight(shape),
+                                     xavier_weight(shape)], couple_axis)
         elif sample == "ortho":
-            values = np.concatenate([ortho_weight(shape[0]), ortho_weight(shape[0])], couple_axis)
+            values = np.concatenate([ortho_weight(shape[0]),
+                                     ortho_weight(shape[0])], couple_axis)
         else:
             raise ValueError("Unsupported initialization scheme: %s" % sample)
     return theano.shared(floatX(values), name)
@@ -50,11 +53,20 @@ def init_weights_2(shape, name, sample = "xavier", scale = 0.01, couple_axis = 1
 def init_weights_4(shape, name, sample = "xavier", scale = 0.01, couple_axis = 1):
     if couple_axis in [0, 1]:
         if sample == "norm":
-            values = np.concatenate([norm_weight(shape, scale), norm_weight(shape, scale), norm_weight(shape, scale), norm_weight(shape, scale)], couple_axis)
+            values = np.concatenate([norm_weight(shape, scale),
+                                     norm_weight(shape, scale),
+                                     norm_weight(shape, scale),
+                                     norm_weight(shape, scale)], couple_axis)
         elif sample == "xavier":
-            values = np.concatenate([xavier_weight(shape), xavier_weight(shape), xavier_weight(shape), xavier_weight(shape)], couple_axis)
+            values = np.concatenate([xavier_weight(shape),
+                                     xavier_weight(shape),
+                                     xavier_weight(shape),
+                                     xavier_weight(shape)], couple_axis)
         elif sample == "ortho":
-            values = np.concatenate([ortho_weight(shape[0]), ortho_weight(shape[0]), ortho_weight(shape[0]), ortho_weight(shape[0])], couple_axis)
+            values = np.concatenate([ortho_weight(shape[0]),
+                                     ortho_weight(shape[0]),
+                                     ortho_weight(shape[0]),
+                                     ortho_weight(shape[0])], couple_axis)
         else:
             raise ValueError("Unsupported initialization scheme: %s" % sample)
     return theano.shared(floatX(values), name)
