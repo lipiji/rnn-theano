@@ -32,7 +32,8 @@ for s in xrange(len(seqs)):
     X = seq[0 : len(seq) - 1, ] 
     Y = seq[1 : len(seq), ]
     label = np.argmax(Y, axis=1)
-    p_label = np.argmax(model.predict(X, np.ones((X.shape[0], 1), np.float32), 1), axis=1)
+
+    p_label = np.argmax(model.predict(X[:, np.newaxis, :], np.ones((X.shape[0], 1), np.float32), 1), axis=2)[:,0]
 
     print i2w[np.argmax(X[0,])], 
     for c in xrange(len(label)):
@@ -48,8 +49,9 @@ a = "r"
 X[0, w2i[a]] = 1
 print a,
 for i in xrange(100):
-    Y = model.predict(X, np.ones((X.shape[0], 1), np.float32),  1)
-    Y = Y[Y.shape[0] - 1,:]
+    Y = model.predict(X[:, np.newaxis, :], np.ones((X.shape[0], 1), np.float32),  1)
+
+    Y = Y[Y.shape[0] - 1, 0, :]
     p_label = np.argmax(Y)
     print i2w[p_label],
     X = np.concatenate((X, np.reshape(Y, (1, len(Y)))), axis=0)

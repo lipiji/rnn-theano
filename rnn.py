@@ -12,7 +12,7 @@ from updates import *
 class RNN(object):
     def __init__(self, in_size, out_size, hidden_size,
                  cell = "gru", optimizer = "rmsprop", p = 0.5):
-        self.X = T.matrix("X")
+        self.X = T.tensor3("X")
         self.in_size = in_size
         self.out_size = out_size
         self.hidden_size = hidden_size
@@ -63,11 +63,10 @@ class RNN(object):
         ce = T.nnet.categorical_crossentropy(y_pred, y_true)
         ce = T.reshape(ce, (self.maskY.shape[0] * self.batch_size, 1))
         return T.sum(ce * m) / T.sum(m)
-        #return T.nnet.categorical_crossentropy(y_pred, y_true).mean()
 
     def define_train_test_funcs(self):
         activation = self.layers[len(self.layers) - 1].activation
-        self.Y = T.matrix("Y")
+        self.Y = T.tensor3("Y")
         pYs = T.reshape(activation, (self.maskY.shape[0] * self.batch_size, self.out_size))
         tYs =  T.reshape(self.Y, (self.maskY.shape[0] * self.batch_size, self.out_size))
         cost = self.categorical_crossentropy(pYs, tYs)
@@ -82,13 +81,6 @@ class RNN(object):
         # eval(): string to function
         optimizer = eval(self.optimizer)
         updates = optimizer(self.params, gparams, lr)
-
-        #updates = sgd(self.params, gparams, lr)
-        #updates = momentum(self.params, gparams, lr)
-        #updates = rmsprop(self.params, gparams, lr)
-        #updates = adagrad(self.params, gparams, lr)
-        #updates = dadelta(self.params, gparams, lr)
-        #updates = adam(self.params, gparams, lr)
         
         self.train = theano.function(inputs = [self.X, self.maskX, self.Y, self.maskY, lr, self.batch_size],
                                                givens = {self.is_train : np.cast['int32'](1)},

@@ -9,41 +9,38 @@ class GRULayer(object):
         prefix = "GRU_"
         layer_id = "_" + layer_id
         self.in_size, self.out_size = shape
-
-        self.W_xr = init_weights((self.in_size, self.out_size), prefix + "W_xr" + layer_id)
-        self.W_hr = init_weights((self.out_size, self.out_size), prefix + "W_hr" + layer_id)
-        self.b_r = init_bias(self.out_size, prefix + "b_r" + layer_id)
         
-        self.W_xz = init_weights((self.in_size, self.out_size), prefix + "W_xz" + layer_id)
-        self.W_hz = init_weights((self.out_size, self.out_size), prefix + "W_hz" + layer_id)
-        self.b_z = init_bias(self.out_size, prefix + "b_z" + layer_id)
-
-        self.W_xh = init_weights((self.in_size, self.out_size), prefix + "W_xh" + layer_id)
-        self.W_hh = init_weights((self.out_size, self.out_size), prefix + "W_hh" + layer_id)
+        self.W_x_rz = init_weights((self.in_size, self.out_size), prefix + "W_x_rz" + layer_id, sample = "xavier", couple_axis = 1)
+        self.W_h_rz = init_weights((self.out_size, self.out_size), prefix + "W_h_rz" + layer_id, sample = "ortho", couple_axis = 1)
+        self.b_rz = init_bias(self.out_size * 2, prefix + "b_rz" + layer_id)
+        
+        self.W_xh = init_weights((self.in_size, self.out_size), prefix + "W_xh" + layer_id, sample = "xavier")
+        self.W_hh = init_weights((self.out_size, self.out_size), prefix + "W_hh" + layer_id, sample = "ortho")
         self.b_h = init_bias(self.out_size, prefix + "b_h" + layer_id)
 
-        self.X = X
-        self.M = mask
+        X_4rz = T.dot(X, self.W_x_rz) + self.b_rz
+        X_4h = T.dot(X, self.W_xh) + self.b_h
 
-        def _active(x, m, pre_h):
-            x = T.reshape(x, (batch_size, self.in_size))
-            pre_h = T.reshape(pre_h, (batch_size, self.out_size))
+        def _slice(_x, n, dim):
+            if _x.ndim == 3:
+                return _x[:, :, n * dim : (n + 1) * dim]
+            return _x[:, n * dim : (n + 1) * dim]
 
-            r = T.nnet.sigmoid(T.dot(x, self.W_xr) + T.dot(pre_h, self.W_hr) + self.b_r)
-            z = T.nnet.sigmoid(T.dot(x, self.W_xz) + T.dot(pre_h, self.W_hz) + self.b_z)
-            gh = T.tanh(T.dot(x, self.W_xh) + T.dot(r * pre_h, self.W_hh) + self.b_h)
+        def _active(m, x_4rz, x_4h, pre_h, W_h_rz, W_hh):
+            rz_preact = x_4rz + T.dot(pre_h, W_h_rz)
+            r = T.nnet.sigmoid(_slice(rz_preact, 0, self.out_size))
+            z = T.nnet.sigmoid(_slice(rz_preact, 1, self.out_size))
+            gh = T.tanh(x_4h + T.dot(r * pre_h, W_hh))
             h = (1 - z) * pre_h + z * gh
-            
             h = h * m[:, None]
-            
-            h = T.reshape(h, (1, batch_size * self.out_size))
             return h
-        outputs, updates = theano.scan(_active, sequences = [self.X, self.M],
-                                 outputs_info = [T.alloc(floatX(0.), 1, batch_size * self.out_size)])
-                                 
-        # dic to matrix 
-        h = T.reshape(outputs, (self.X.shape[0], batch_size * self.out_size))
         
+        outputs, updates = theano.scan(_active,
+                                       sequences = [mask, X_4rz, X_4h],
+                                       outputs_info = [T.alloc(floatX(0.), batch_size, self.out_size)],
+                                       non_sequences = [self.W_h_rz, self.W_hh],
+                                       strict = True)
+        h = outputs
         # dropout
         if p > 0:
             srng = T.shared_randomstreams.RandomStreams(rng.randint(999999))
@@ -52,8 +49,7 @@ class GRULayer(object):
         else:
             self.activation = T.switch(T.eq(is_train, 1), h, h)
        
-        self.params = [self.W_xr, self.W_hr, self.b_r,
-                       self.W_xz, self.W_hz, self.b_z,
+        self.params = [self.W_x_rz, self.W_h_rz, self.b_rz,
                        self.W_xh, self.W_hh, self.b_h]
 
 class BdGRU(object):
