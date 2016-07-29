@@ -65,7 +65,7 @@ a = u"黛玉"
 X[0, w2i[a]] = 1
 print a,
 for i in xrange(200):
-    Y = model.predict(X[:, np.newaxis, :], np.ones((X.shape[0], 1), np.float32),  1)[0]
+    Y = model.predict(X[:, np.newaxis, :], np.ones((X.shape[0], 1), np.float32),  1)
     Y = Y[Y.shape[0] - 1, 0, :]
     p_label = np.argmax(Y)
     print i2w[p_label],
@@ -78,7 +78,7 @@ a = u"宝钗"
 X[0, w2i[a]] = 1
 print a,
 for i in xrange(200):
-    Y = model.predict(X[:, np.newaxis, :], np.ones((X.shape[0], 1), np.float32),  1)[0]
+    Y = model.predict(X[:, np.newaxis, :], np.ones((X.shape[0], 1), np.float32),  1)
     Y = Y[Y.shape[0] - 1, 0, :]
     p_label = np.argmax(Y)
     print i2w[p_label],
