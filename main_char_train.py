@@ -47,7 +47,7 @@ for i in xrange(200):
     error /= len(seqs);
     if error < g_error:
         g_error = error
-        save_model("./model/rnn.model_" + str(i), model)
+        #save_model("./model/rnn.model_" + str(i), model)
 
     print "Iter = " + str(i) + ", Loss = " + str(error) + ", Time = " + str(in_time)
     if error <= e:
