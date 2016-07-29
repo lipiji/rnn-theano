@@ -10,8 +10,8 @@ class GRULayer(object):
         layer_id = "_" + layer_id
         self.in_size, self.out_size = shape
         
-        self.W_x_rz = init_weights((self.in_size, self.out_size), prefix + "W_x_rz" + layer_id, sample = "xavier", couple_axis = 1)
-        self.W_h_rz = init_weights((self.out_size, self.out_size), prefix + "W_h_rz" + layer_id, sample = "ortho", couple_axis = 1)
+        self.W_x_rz = init_weights_2((self.in_size, self.out_size), prefix + "W_x_rz" + layer_id, sample = "xavier")
+        self.W_h_rz = init_weights_2((self.out_size, self.out_size), prefix + "W_h_rz" + layer_id, sample = "ortho")
         self.b_rz = init_bias(self.out_size * 2, prefix + "b_rz" + layer_id)
         
         self.W_xh = init_weights((self.in_size, self.out_size), prefix + "W_xh" + layer_id, sample = "xavier")

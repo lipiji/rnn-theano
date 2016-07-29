@@ -10,51 +10,41 @@ class LSTMLayer(object):
         layer_id = "_" + layer_id
         self.in_size, self.out_size = shape
         
-        self.W_xi = init_weights((self.in_size, self.out_size), prefix + "W_xi" + layer_id)
-        self.W_hi = init_weights((self.out_size, self.out_size), prefix + "W_hi" + layer_id)
-        self.W_ci = init_weights((self.out_size, self.out_size), prefix + "W_ci" + layer_id)
-        self.b_i = init_bias(self.out_size, prefix + "b_i" + layer_id)
-        
-        self.W_xf = init_weights((self.in_size, self.out_size), prefix + "W_xf" + layer_id)
-        self.W_hf = init_weights((self.out_size, self.out_size), prefix + "W_hf" + layer_id)
-        self.W_cf = init_weights((self.out_size, self.out_size), prefix + "W_cf" + layer_id)
-        self.b_f = init_bias(self.out_size, prefix + "b_f" + layer_id)
+        self.W_x_ifoc = init_weights_4((self.in_size, self.out_size), prefix + "W_x_ifoc" + layer_id, sample = "xavier")
+        self.W_h_ifoc = init_weights_4((self.out_size, self.out_size), prefix + "W_h_ifoc" + layer_id, sample = "ortho")
+        self.W_c_if = init_weights_2((self.out_size, self.out_size), prefix + "W_c_if" + layer_id, sample = "ortho")
+        self.W_c_o = init_weights((self.out_size, self.out_size), prefix + "W_c_o" + layer_id, sample = "ortho")
+        self.b_ifoc = init_bias(self.out_size * 4, prefix + "b_ifoc" + layer_id)
 
-        self.W_xc = init_weights((self.in_size, self.out_size), prefix + "W_xc" + layer_id)
-        self.W_hc = init_weights((self.out_size, self.out_size), prefix + "W_hc" + layer_id)
-        self.b_c = init_bias(self.out_size, prefix + "b_c" + layer_id)
+        self.params = [self.W_x_ifoc, self.W_h_ifoc, self.W_c_if, self.W_c_o, self.b_ifoc]
 
-        self.W_xo = init_weights((self.in_size, self.out_size), prefix + "W_xo" + layer_id)
-        self.W_ho = init_weights((self.out_size, self.out_size), prefix + "W_ho" + layer_id)
-        self.W_co = init_weights((self.out_size, self.out_size), prefix + "W_co" + layer_id)
-        self.b_o = init_bias(self.out_size, prefix + "b_o" + layer_id)
+        def _slice(_x, n, dim):
+            if _x.ndim == 3:
+                return _x[:, :, n * dim : (n + 1) * dim]
+            return _x[:, n * dim : (n + 1) * dim]
 
-        self.X = X
-        self.M = mask
+        X_4ifoc = T.dot(X, self.W_x_ifoc) + self.b_ifoc
+        def _active(m, x_4ifoc, pre_h, pre_c, W_h_ifoc, W_c_if, W_c_o):
+            ifoc_preact = x_4ifoc + T.dot(pre_h, W_h_ifoc)
+            c_if_preact = T.dot(pre_c, W_c_if)
 
-        def _active(x, m, pre_h, pre_c):
-            x = T.reshape(x, (batch_size, self.in_size))
-            pre_h = T.reshape(pre_h, (batch_size, self.out_size))
-            pre_c = T.reshape(pre_c, (batch_size, self.out_size))
-
-            i = T.nnet.sigmoid(T.dot(x, self.W_xi) + T.dot(pre_h, self.W_hi) + T.dot(pre_c, self.W_ci) + self.b_i)
-            f = T.nnet.sigmoid(T.dot(x, self.W_xf) + T.dot(pre_h, self.W_hf) + T.dot(pre_c, self.W_cf) + self.b_f)
-            gc = T.tanh(T.dot(x, self.W_xc) + T.dot(pre_h, self.W_hc) + self.b_c)
+            i = T.nnet.sigmoid(_slice(ifoc_preact, 0, self.out_size) + _slice(c_if_preact, 0, self.out_size))
+            f = T.nnet.sigmoid(_slice(ifoc_preact, 1, self.out_size) + _slice(c_if_preact, 1, self.out_size))
+            gc = T.tanh(_slice(ifoc_preact, 2, self.out_size))
             c = f * pre_c + i * gc
-            o = T.nnet.sigmoid(T.dot(x, self.W_xo) + T.dot(pre_h, self.W_ho) + T.dot(c, self.W_co) + self.b_o)
+            o = T.nnet.sigmoid(_slice(ifoc_preact, 3, self.out_size) + T.dot(c, W_c_o))
             h = o * T.tanh(c)
 
             c = c * m[:, None]
             h = h * m[:, None]
-            c = T.reshape(c, (1, batch_size * self.out_size))
-            h = T.reshape(h, (1, batch_size * self.out_size))
             return h, c
         [h, c], updates = theano.scan(_active,
-                                      sequences = [self.X, self.M],
-                                      outputs_info = [T.alloc(floatX(0.), 1, batch_size * self.out_size),
-                                                      T.alloc(floatX(0.), 1, batch_size * self.out_size)])
+                                      sequences = [mask, X_4ifoc],
+                                      outputs_info = [T.alloc(floatX(0.), batch_size, self.out_size),
+                                                      T.alloc(floatX(0.), batch_size, self.out_size)],
+                                      non_sequences = [self.W_h_ifoc, self.W_c_if, self.W_c_o],
+                                      strict = True)
         
-        h = T.reshape(h, (self.X.shape[0], batch_size * self.out_size))
         # dropout
         if p > 0:
             srng = T.shared_randomstreams.RandomStreams(rng.randint(999999))
@@ -63,10 +53,7 @@ class LSTMLayer(object):
         else:
             self.activation = T.switch(T.eq(is_train, 1), h, h)
         
-        self.params = [self.W_xi, self.W_hi, self.W_ci, self.b_i,
-                       self.W_xf, self.W_hf, self.W_cf, self.b_f,
-                       self.W_xc, self.W_hc,            self.b_c,
-                       self.W_xo, self.W_ho, self.W_co, self.b_o]
+        
 
 class BdLSTM(object):
     # Bidirectional LSTM Layer.

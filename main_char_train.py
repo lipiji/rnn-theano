@@ -13,7 +13,7 @@ use_gpu(0)
 e = 0.01
 lr = 1
 drop_rate = 0.
-batch_size = 20
+batch_size = 10
 hidden_size = [100, 100]
 # try: gru, lstm
 cell = "gru"
