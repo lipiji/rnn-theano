@@ -12,9 +12,9 @@ import data
 use_gpu(0)
 
 e = 0.01
-lr = 0.1
+lr = 1.
 drop_rate = 0.
-batch_size = 50
+batch_size = 10
 hidden_size = [400, 400]
 # try: gru, lstm
 cell = "gru"
@@ -37,7 +37,7 @@ for i in xrange(100):
     in_start = time.time()
     for batch_id, xy in data_xy.items():
         X, Y, mask, local_batch_size = data.index2seqs(seqs, xy[0], w2i)
-        cost = model.train(X, mask, Y, lr, local_batch_size)[0]
+        cost = model.train(X, mask, Y, mask, lr, local_batch_size)
         error += cost
         print i, g_error, batch_id, "/", len(data_xy), cost
     in_time = time.time() - in_start

@@ -152,7 +152,7 @@ def index2seqs(lines, x_index, w2i):
 
     max_len = np.max(seqs_len);
     mask = np.zeros((max_len, len(batch_x)), dtype = theano.config.floatX)
-    concat_X = np.zeros((max_len, len(batch_x) * dim), dtype = theano.config.floatX)
+    concat_X = np.zeros((max_len, len(batch_x), dim), dtype = theano.config.floatX)
     concat_Y = concat_X.copy()
     
     for b_i in xrange(len(batch_x)):
@@ -162,8 +162,8 @@ def index2seqs(lines, x_index, w2i):
         for r in xrange(max_len - X.shape[0]):
             X = np.concatenate((X, zeros_m), axis=0)
             Y = np.concatenate((Y, zeros_m), axis=0)
-        concat_X[:, b_i * dim : (b_i + 1) * dim] = X 
-        concat_Y[:, b_i * dim : (b_i + 1) * dim] = Y
+        concat_X[:, b_i, :] = X 
+        concat_Y[:, b_i, :] = Y
     return concat_X, concat_Y, mask, len(batch_x)
 
 #data: http://deeplearning.net/data/mnist/mnist.pkl.gz
