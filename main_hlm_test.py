@@ -25,7 +25,7 @@ optimizer = "adadelta"
 print "building..."
 model = RNN(dim_x, dim_y, hidden_size, cell, optimizer, drop_rate)
 print "load model..."
-model = load_model("./model/rnn_hlm.model_76", model)
+model = load_model("./model/rnn_hlm.model", model)
 
 '''
 num_x = 0.0
