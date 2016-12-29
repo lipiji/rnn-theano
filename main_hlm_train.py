@@ -42,7 +42,7 @@ for i in xrange(100):
         print i, g_error, batch_id, "/", len(data_xy), cost
     in_time = time.time() - in_start
 
-    error /= len(seqs);
+    error /= len(data_xy);
     if error < g_error:
         g_error = error
         save_model("./model/rnn_hlm.model_" + str(i), model)
