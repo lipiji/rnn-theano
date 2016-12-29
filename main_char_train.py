@@ -44,7 +44,7 @@ for i in xrange(200):
         error += cost
     in_time = time.time() - in_start
 
-    error /= len(seqs);
+    error /= len(data_xy);
     if error < g_error:
         g_error = error
         #save_model("./model/rnn.model_" + str(i), model)
