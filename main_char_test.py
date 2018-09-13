@@ -1,4 +1,8 @@
 #pylint: skip-file
+cudaid = 0 
+import os
+os.environ["THEANO_FLAGS"] = "device=cuda" + str(cudaid) 
+
 import time
 import sys
 import numpy as np
@@ -7,7 +11,6 @@ import theano.tensor as T
 from utils_pg import *
 from rnn import *
 
-use_gpu(0)
 
 import data
 drop_rate = 0.

@@ -1,4 +1,8 @@
 #pylint: skip-file
+cudaid = 0 
+import os
+os.environ["THEANO_FLAGS"] = "device=cuda" + str(cudaid) 
+
 import time
 import sys
 import numpy as np
@@ -8,7 +12,6 @@ from utils_pg import *
 from rnn import *
 import data
 
-use_gpu(0)
 
 e = 0.01
 lr = 1
