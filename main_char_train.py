@@ -1,5 +1,5 @@
 #pylint: skip-file
-cudaid = 0 
+cudaid = 1 
 import os
 os.environ["THEANO_FLAGS"] = "device=cuda" + str(cudaid) 
 
@@ -19,7 +19,7 @@ drop_rate = 0.
 batch_size = 10
 hidden_size = [100, 100]
 # try: gru, lstm
-cell = "gru"
+cell = "lstm"
 # try: sgd, momentum, rmsprop, adagrad, adadelta, adam, nesterov_momentum
 optimizer = "adadelta" 
 

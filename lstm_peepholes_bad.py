@@ -12,9 +12,11 @@ class LSTMLayer(object):
         
         self.W_x_ifoc = init_weights_4((self.in_size, self.out_size), prefix + "W_x_ifoc" + layer_id, sample = "xavier")
         self.W_h_ifoc = init_weights_4((self.out_size, self.out_size), prefix + "W_h_ifoc" + layer_id, sample = "ortho")
+        self.W_c_if = init_weights_2((self.out_size, self.out_size), prefix + "W_c_if" + layer_id, sample = "ortho")
+        self.W_c_o = init_weights((self.out_size, self.out_size), prefix + "W_c_o" + layer_id, sample = "ortho")
         self.b_ifoc = init_bias(self.out_size * 4, prefix + "b_ifoc" + layer_id)
 
-        self.params = [self.W_x_ifoc, self.W_h_ifoc,self.b_ifoc]
+        self.params = [self.W_x_ifoc, self.W_h_ifoc, self.W_c_if, self.W_c_o, self.b_ifoc]
 
         def _slice(_x, n, dim):
             if _x.ndim == 3:
@@ -22,14 +24,15 @@ class LSTMLayer(object):
             return _x[:, n * dim : (n + 1) * dim]
 
         X_4ifoc = T.dot(X, self.W_x_ifoc) + self.b_ifoc
-        def _active(m, x_4ifoc, pre_h, pre_c, W_h_ifoc):
+        def _active(m, x_4ifoc, pre_h, pre_c, W_h_ifoc, W_c_if, W_c_o):
             ifoc_preact = x_4ifoc + T.dot(pre_h, W_h_ifoc)
-            
-            i = T.nnet.sigmoid(_slice(ifoc_preact, 0, self.out_size))
-            f = T.nnet.sigmoid(_slice(ifoc_preact, 1, self.out_size))
-            o = T.nnet.sigmoid(_slice(ifoc_preact, 2, self.out_size))
-            gc = T.tanh(_slice(ifoc_preact, 3, self.out_size))
+            c_if_preact = T.dot(pre_c, W_c_if)
+
+            i = T.nnet.sigmoid(_slice(ifoc_preact, 0, self.out_size) + _slice(c_if_preact, 0, self.out_size))
+            f = T.nnet.sigmoid(_slice(ifoc_preact, 1, self.out_size) + _slice(c_if_preact, 1, self.out_size))
+            gc = T.tanh(_slice(ifoc_preact, 2, self.out_size))
             c = f * pre_c + i * gc
+            o = T.nnet.sigmoid(_slice(ifoc_preact, 3, self.out_size) + T.dot(c, W_c_o))
             h = o * T.tanh(c)
 
             c = c * m[:, None]
@@ -39,7 +42,7 @@ class LSTMLayer(object):
                                       sequences = [mask, X_4ifoc],
                                       outputs_info = [T.alloc(floatX(0.), batch_size, self.out_size),
                                                       T.alloc(floatX(0.), batch_size, self.out_size)],
-                                      non_sequences = [self.W_h_ifoc],
+                                      non_sequences = [self.W_h_ifoc, self.W_c_if, self.W_c_o],
                                       strict = True)
         
         # dropout

@@ -1,5 +1,5 @@
 #pylint: skip-file
-cudaid = 0 
+cudaid = 1 
 import os
 os.environ["THEANO_FLAGS"] = "device=cuda" + str(cudaid) 
 
@@ -21,7 +21,7 @@ dim_x = len(w2i)
 dim_y = len(w2i)
 print dim_x, dim_y
 
-cell = "gru" # cell = "gru" or "lstm"
+cell = "lstm" # cell = "gru" or "lstm"
 optimizer = "adadelta"
 
 print "building..."
